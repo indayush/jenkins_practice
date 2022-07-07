@@ -1,0 +1,23 @@
+pipeline {
+    agent any
+
+    stages{
+        stage('Stage 1'){
+            steps{
+                echo('Hello World')    
+            }            
+        }
+        stage("Function Call"){
+            steps{
+                myFunc("This is a call to function")
+            }
+        }
+    }
+    
+}
+
+def myFunc(String inputString){
+    def funcNumber
+
+    echo "Input Text = ${inputString}"
+}

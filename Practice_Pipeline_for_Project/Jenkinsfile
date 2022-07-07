@@ -1,0 +1,64 @@
+pipeline {
+    agent any
+
+    parameters{
+        choice{name: "cEnv", description: "Select the Environment",
+         choices: ["DEV", "QA", "QA1", "QA2", "QA3", "QA4", "PP", "PROD"]}
+
+        choice{name: "cRegion", description: "Select the AWS Region for Deployment",
+         choices: ["ap-south-1", "ap=southheast-1"]}
+
+        choice{name: "cAZ_Singapore", description: "Select the Availibility Zone for Deployment",
+         choices: ["ap-southeast-1 A", "ap-southeast-1 B", "ap-southeast-1 C"]}
+
+        choice{name: "cAZ_Mumbai", description: "Select the Availibility Zone for Deployment",
+         choices: ["ap-south-1 A", "ap-south-1 B", "ap-south-1 C"]}
+        
+    }
+
+    stages{
+        stage("Clean Up"){
+            steps{
+                echo("Starting the Cleanup Stage")
+                // -------------------------------------------------------------------------------
+                deleteDir()
+                // -------------------------------------------------------------------------------
+                echo("Wrapping up the Cleanup Stage")
+            }
+        }
+
+        stage("Repository Clone"){
+            steps{
+                echo("Starting the Repository Clone Stage")
+                // -------------------------------------------------------------------------------                
+                sh "git clone https://github.com/jenkins-docs/simple-java-maven-app.git"
+                // -------------------------------------------------------------------------------
+                echo("Wrapping up the Repository Clone Stage")
+            }
+        }
+
+        stage("Build"){
+            steps{
+                echo("Starting the Build Stage")
+                // -------------------------------------------------------------------------------
+                dir("simple-java-maven-app"){
+                    sh "mvn clean install"
+                }   
+                // -------------------------------------------------------------------------------
+                 echo("Wrapping up the Build Stage")             
+            }
+        }
+        
+        stage("Test"){
+            steps{
+                echo("Starting the Test Stage")
+                // -------------------------------------------------------------------------------
+                dir("simple-java-maven-app"){
+                    sh "mvn test"
+                }   
+                // -------------------------------------------------------------------------------
+                 echo("Wrapping up the Test Stage")             
+            }
+        }
+    }
+}

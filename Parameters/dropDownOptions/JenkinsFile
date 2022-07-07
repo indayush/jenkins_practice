@@ -1,0 +1,17 @@
+pipeline {
+    agent any
+
+    parameters{
+        choice(choices: ["Option_1", "Option_2", "Option_3"], 
+        description: "Statement for the Dropdown: ", 
+        name: "nameOfDropDownVariable")        
+    }
+
+    stages{
+        stage("Stage 1"){
+            steps{
+                echo("Chosen option is = ${params.nameOfDropDownVariable}")
+            }
+        }
+    }
+}

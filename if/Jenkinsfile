@@ -1,0 +1,44 @@
+pipeline {
+
+    agent any
+
+    environment{
+        def myString = "Hello World"
+        def myBoolean = true
+    }
+
+    parameters{
+        booleanParam(name: "bVariable", description: "Boolean Parameter", defaultValue: false)
+    }
+
+    stages{
+        stage("Initial"){
+            steps{
+                sh "aws s3 ls"
+                echo "Printing Variable = ${myString}"
+                echo "Printing Variable = ${myBoolean}"
+
+                script{
+                    if(params.bVariable == true){
+                        echo "MARKING THE BUILD = SUCCESS"
+                        currentBuild.result = "SUCCESS"
+                        return
+                    }else {
+                        echo "MARKING THE BUILD = FAILURE"
+                    }
+
+                    // if("${myBoolean}" == true){
+                    //     echo "MARKING THE BUILD = SUCCESS"
+                    //     currentBuild.result = "SUCCESS"
+                    //     return
+                    // }else {
+                    //     echo "MARKING THE BUILD = FAILURE"
+                    // }
+                }
+            }
+
+            
+        }
+    }
+
+}

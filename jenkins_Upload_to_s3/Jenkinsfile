@@ -1,0 +1,55 @@
+pipeline {
+    agent any
+
+    parameters{
+        string(defaultValue: "ap-south-1", description: "AWS Region for S3 Bucket", name: "s3_bucket_region")
+    }
+
+    stages{
+        stage("List Buckets"){
+            steps{
+                deleteDir()
+                echo "aws s3 ls"
+            }
+        }
+        stage("Clone Repo"){
+            steps{
+                sh "git clone https://github.com/jenkins-docs/simple-java-maven-app.git"
+            }
+        }
+        stage("Build"){
+            steps{
+                dir("simple-java-maven-app"){
+                    sh "mvn clean install"
+                }                
+            }
+        }
+        stage("Test"){
+            steps{
+                dir("simple-java-maven-app"){
+                    sh "mvn test"
+                }                
+            }
+        }
+        stage("Upload to S3"){
+            steps{
+                dir("simple-java-maven-app"){
+                    pwd()
+                    withAWS(region: 'ap-south-1', credentials: 'OLD_AWS_ayush-cli'){
+                        s3Upload(bucket: 'ayush-artifact-bucket', workingDir: 'target', includePathPattern: '*.jar')
+                    }
+                }
+            }
+        }
+        stage("Upload built files to S3"){
+            steps{
+                dir("simple-java-maven-app"){
+                    echo "pwd"
+                    withAWS(region: 'ap-south-1', credentials: 'OLD_AWS_ayush-cli'){
+                        s3Upload(bucket: 'ayush-artifact-bucket', workingDir: '', includePathPattern: '**/*.*')
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,22 @@
+// Will Trigger a different pipeline if it runs correctly
+// e.g. - Run Prod Deployment if Service Build is success
+
+pipeline {
+    agent any 
+
+    stages{
+       stage("Demo"){
+            steps{
+                echo "Environmental String <BUILD ID> = ${env.BUILD_ID}"
+                echo "Environmental String <BUILD NUMBER> = ${env.BUILD_NUMBER}"
+                echo "Environmental String <JENKINS URL> = ${env.JENKINS_URL}"
+            }
+        }
+        stage("Trigerring_Other_Pipeline"){
+            steps{
+                build 'ifCondition'
+            }
+        }
+
+    }
+}

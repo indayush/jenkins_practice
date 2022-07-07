@@ -1,0 +1,27 @@
+pipeline {
+    agent any
+
+    parameters{
+
+        choice(name: "choiceParam",
+         description: "Select the AZ to deploy into.",
+         choices: ["ap-south-1 A", "ap-south-1 B", "ap-south-1 C"])
+
+        booleanParam(name: "boolParam", description: "Confirm the Deployment ?", defaultValue: false)
+        
+        string(name: "stringParam", description: "Enter the branch name.", defaultValue: "Default Value")
+        
+    }
+
+    stages{
+        stage("Stage_1"){
+            steps{
+                
+                echo("Selected value of String = ${params.stringParam}")
+                echo("Selected value of Choice = ${params.choiceParam}")
+                echo("Selected value of Boolean = ${params.boolParam}")
+                
+            }
+        }
+    }
+}

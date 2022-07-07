@@ -1,0 +1,33 @@
+pipeline{
+
+    agent any
+
+    stages{
+        stage("Clean Up"){
+            steps{
+                deleteDir()
+            }
+        }
+        stage("Clone Repo"){
+            steps{
+                sh "git clone https://github.com/indayush/simple-node-js-react-npm-app.git"
+            }
+        }
+        stage("Build"){
+            steps{
+                dir("simple-node-js-react-npm-app"){
+                    sh "npm install"
+                }
+            }
+            
+        }
+        stage("Run"){
+            steps{
+                dir("simple-node-js-react-npm-app"){
+                    sh "npm start"
+                }
+            }
+        }
+        
+    }
+}

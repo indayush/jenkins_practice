@@ -1,0 +1,25 @@
+pipeline{
+    agent any
+
+    parameters{
+        // booleanParam(defaultValue: false, description: "Message from Description = Enable Service ?", name: "myDemoVariable")
+        booleanParam(name: "myDemoVariable", description: "Message from Description = Enable Service ?", defaultValue: false)
+        booleanParam(name: "myDemoVariable2", description: "Message from Description 2 = Enable Service ?", defaultValue: false)
+                
+    }
+    stages{
+        stage("Demo"){
+            steps{
+                echo "Echo Demo"
+                echo "Boolean myDemoVariable value is : ${params.myDemoVariable}"
+            }
+        }
+        stage("Demo 2"){
+            steps{
+                echo("Echo Demo 2")
+                echo("Boolean myDemoVariable2 value is : ${params.myDemoVariable2}")
+            }
+        }
+        
+    }
+}

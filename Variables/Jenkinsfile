@@ -1,0 +1,19 @@
+pipeline {
+    agent any
+
+    environment{
+        def sHelloWorld = "Hello World"
+        def iNum = 1324
+        def bDemoBoolean = false    
+    }
+
+    stages{
+        stage("Variables_Demo"){
+            steps{
+                echo "String = ${sHelloWorld}"
+                echo "Number = ${iNum}"
+                echo "Boolean = ${bDemoBoolean}"   
+            }
+        }
+    }
+}

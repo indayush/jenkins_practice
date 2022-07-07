@@ -1,0 +1,15 @@
+pipeline {
+    agent any
+
+    parameters{
+        string(defaultValue: "String Value", description: "Demo String Value", name: "stringVariableName")
+    }
+
+    stages{
+        stage("Stage 1"){
+            steps{
+                echo("String Value is : ${params.stringVariableName}")
+            }
+        }
+    }
+}
