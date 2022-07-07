@@ -2,19 +2,29 @@ pipeline {
     agent any
 
     parameters{
+        
+        // AWS Configurations
         string(defaultValue: "ap-south-1", description: "AWS Region for S3 Bucket", name: "s3_bucket_region")
+        choice(choices: ["ayush-artifact-bucket", "my-hg-destination-bkt"], description: "Name of the S3 Bucket to upload the Artifacts", name: "s3_bucket_name")
+
+        // Jenkins Configurations
+        string(defaultValue: "OLD_AWS_ayush-cli", description: "Name of the Credentials Profile in jenkins DB", name: "credentials_in_jenkins")
+        string(defaultValue: "target", description: "Path of the folder from where the Artifacts needs to be picked", name: "folder_path_for_artifactory")        
+        
+        // Project Configurations
+        string(defaultValue: "https://github.com/jenkins-docs/simple-java-maven-app.git", description: "Git URL of the Maven project", name: "git_url")
+
     }
 
     stages{
-        stage("List Buckets"){
+        stage("Cleanup"){
             steps{
-                deleteDir()
-                echo "aws s3 ls"
+                deleteDir()                
             }
         }
         stage("Clone Repo"){
             steps{
-                sh "git clone https://github.com/jenkins-docs/simple-java-maven-app.git"
+                sh "git clone ${params.git_url}"
             }
         }
         stage("Build"){
@@ -24,19 +34,19 @@ pipeline {
                 }                
             }
         }
-        stage("Test"){
-            steps{
-                dir("simple-java-maven-app"){
-                    sh "mvn test"
-                }                
-            }
-        }
+        // stage("Test"){
+        //     steps{
+        //         dir("simple-java-maven-app"){
+        //             sh "mvn test"
+        //         }                
+        //     }
+        // }
         stage("Upload to S3"){
             steps{
                 dir("simple-java-maven-app"){
-                    pwd()
-                    withAWS(region: 'ap-south-1', credentials: 'OLD_AWS_ayush-cli'){
-                        s3Upload(bucket: 'ayush-artifact-bucket', workingDir: 'target', includePathPattern: '*.jar')
+                    // pwd()
+                    withAWS(region: "${params.s3_bucket_region}", credentials: "${params.credentials_in_jenkins}"){
+                        s3Upload(bucket: "${params.s3_bucket_name}", workingDir: "${params.folder_path_for_artifactory}", includePathPattern: '*.jar')
                     }
                 }
             }
@@ -45,8 +55,8 @@ pipeline {
             steps{
                 dir("simple-java-maven-app"){
                     echo "pwd"
-                    withAWS(region: 'ap-south-1', credentials: 'OLD_AWS_ayush-cli'){
-                        s3Upload(bucket: 'ayush-artifact-bucket', workingDir: '', includePathPattern: '**/*.*')
+                    withAWS(region: "${params.s3_bucket_region}", credentials: "${params.credentials_in_jenkins}"){
+                        s3Upload(bucket: "${params.s3_bucket_name}", workingDir: '', includePathPattern: '**/*.*')
                     }
                 }
             }
