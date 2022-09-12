@@ -1,0 +1,70 @@
+
+# ============================================
+#   JENKINS INSTALL
+# ============================================
+
+
+wget -p -O - https://pkg.jenkins.io/debian/jenkins.io.key | sudo apt-key add -
+sudo sh -c 'echo deb http://pkg.jenkins.io/debian-stable binary/ > /etc/apt/sources.list.d/jenkins.list'
+sudo apt update
+sudo apt install -y openjdk-11-jdk
+sudo apt install -y jenkins
+sudo systemctl start jenkins
+sudo ufw allow 8080
+sudo ufw allow 22
+echo "y" | sudo ufw enable
+
+sudo cat /var/lib/jenkins/secrets/initialAdminPassword
+
+
+# ============================================
+#   After Jenkins, Installing ROR
+# ============================================
+
+
+sudo su
+sudo apt update
+sudo passwd jenkins
+echo 'jenkins ALL=(ALL) ALL' >> /etc/sudoers
+exit
+
+
+
+sudo su - jenkins
+sudo apt update
+sudo apt-get install -y software-properties-common
+sudo apt install -y git curl gnupg2 htop
+sudo apt update
+
+
+
+	# RVM 2.7.2 INSTALL
+gpg2 --keyserver hkp://keyserver.ubuntu.com --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 7D2BAF1CF37B13E2069D6956105BD0E739499BDB
+\curl -sSL https://get.rvm.io -o rvm.sh
+cat rvm.sh | bash -s stable --rails
+source ~/.rvm/scripts/rvm		# This will reload the shell to start using the RVM command-line tool
+
+	# RUBY INSTALL
+rvm install "ruby-2.7.2"
+rvm use "ruby-2.7.2" --default
+rvm uninstall ruby-3.0.0
+export PATH="$PATH:$HOME/.rvm/rubies/ruby-2.7.2/bin"
+
+	# RAILS INSTALL
+gem install rails -v 5.2.3
+
+
+	# NVM INSTALL
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+	
+export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
+# https://github.com/nvm-sh/nvm#ansible
+
+
+	# LATEST NODE INSTALL
+nvm install --lts
+
+	# NPM INSTALL
+sudo apt install -y npm
+
