@@ -17,17 +17,20 @@ pipeline {
 
         stage("Build"){                
             steps{
-                sh '''#!/bin/bash
-                source ~/.rvm/scripts/rvm
-                source ~/.bashrc
+                dir("ror-hello-world"){
+                    sh '''#!/bin/bash
+                        source ~/.rvm/scripts/rvm
+                        source ~/.bashrc
+                        
+
+                        git branch
+                        git checkout demo
+                        echo "<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>"
+                        git branch
+                        ls -la                        
+                        '''
+                }
                 
-                cd ror-hello-world
-                git branch
-                git checkout demo
-                echo "<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>"
-                git branch
-                ls -la                        
-                '''
             }           
         }
 
