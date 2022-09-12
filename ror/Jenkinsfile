@@ -3,9 +3,14 @@ pipeline {
     agent any
     
     parameters{
+    
+        string(
+                name: "s_Branch_Name", defaultValue: "demo",
+                description: "Enter Brnach Name")
 
-        string(defaultValue: "demo", description: "Enter Brnach Name", name: "s_Branch_Name")
-        string(defaultValue: "https://github.com/indayush/ror-hello-world.git", description: "Git URL of the project", name: "git_url")
+        string(
+                name: "git_url", defaultValue: "https://github.com/indayush/ror-hello-world.git", 
+                description: "Git URL of the project")
         
     }
 
