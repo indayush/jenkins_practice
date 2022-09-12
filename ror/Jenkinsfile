@@ -1,6 +1,13 @@
 pipeline {
 
     agent any
+    
+    parameters{
+
+        string(defaultValue: "demo", description: "Enter Brnach Name", name: "s_Branch_Name")
+        string(defaultValue: "https://github.com/indayush/ror-hello-world.git", description: "Git URL of the project", name: "git_url")
+        
+    }
 
     stages{
         stage("Clean Up"){
@@ -11,28 +18,27 @@ pipeline {
 
         stage("Clone Repo"){
             steps{
-                sh "git clone https://github.com/indayush/ror-hello-world.git"
+                sh "git clone ${params.git_url}"
             }
         }
 
-        stage("Build"){                
+        stage("Checkout Branch"){
             steps{
                 dir("ror-hello-world"){
+                    sh "git checkout ${params.s_Branch_Name}"
+                    sh "git branch"
                     sh '''#!/bin/bash
                         source ~/.rvm/scripts/rvm
                         source ~/.bashrc
-                        
 
-                        git branch
-                        git checkout demo
-                        echo "<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>"
-                        git branch
-                        ls -la                        
-                        '''
+                        rvm list
+                        rails -v                   
+                    '''
                 }
-                
-            }           
+            }
         }
+
+        
 
     }
 
