@@ -11,6 +11,11 @@ pipeline {
         string(
                 name: "git_url", defaultValue: "https://github.com/indayush/ror-hello-world.git", 
                 description: "Git URL of the project")
+
+        choice(
+                choices: ["DEV", "QA", "QA1", "PROD"], 
+                name: "select_env",
+                description: "Select Environment: ")
         
     }
 
@@ -45,6 +50,17 @@ pipeline {
 
         
 
+    }
+
+
+    post {
+        failure {
+            // Runs ONLY in case of failure, We can have simple Notification/'git blame' on build history :)
+            // currentBuild.displayName = 'This build needs help!!!'
+            // buildDescription("Committer: ${GERRIT_PATCHSET_UPLOADER_NAME}")
+
+            sh("echo FAILURE FOUND")
+        }
     }
 
 }
