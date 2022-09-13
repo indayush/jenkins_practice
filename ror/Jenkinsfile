@@ -19,10 +19,25 @@ pipeline {
         
     }
 
+    // Entire Pipeline Timeout value
+    options{
+        timeout(time: 15, unit: 'MINUTES')
+    }
+
     stages{
         stage("Clean Up"){
+            // Max Timeout value for this Stage            
+            options{
+                timeout(time: 1, unit: 'MINUTES')
+            }
             steps{
                 deleteDir()
+            }
+        }
+
+        stage("Targeting Environment"){
+            steps{
+                sh "echo ${params.select_env} Environment is selected"
             }
         }
 
@@ -42,7 +57,8 @@ pipeline {
                         source ~/.bashrc
 
                         rvm list
-                        rails -v                   
+                        rails -v
+                        ruby -v            
                     '''
                 }
             }
