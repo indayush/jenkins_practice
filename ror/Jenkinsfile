@@ -13,10 +13,8 @@ pipeline {
                 description: "Git URL of the project")
 
         choice(
-                choices: ["DEV", "QA", "QA1", "PROD"], 
-                name: "select_env",
+                name: "select_env", choices: ["DEV", "QA", "QA1", "PROD"], 
                 description: "Select Environment: ")
-        
     }
 
     // Entire Pipeline Timeout value
@@ -58,13 +56,23 @@ pipeline {
 
                         rvm list
                         rails -v
-                        ruby -v            
+                        ruby -v 
+                        ls -lah
+                        pwd            
                     '''
                 }
             }
         }
 
-        
+        stage("Zip the latest code"){
+            steps{
+                
+                sh "ls"
+                sh "zip -r ${params.s_Branch_Name}.zip ror-hello-world"
+                sh "pwd"
+                sh "ls -lh"
+            }
+        }
 
     }
 

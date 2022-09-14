@@ -14,11 +14,6 @@ pipeline {
         // Project Configurations
         string(defaultValue: "https://github.com/jenkins-docs/simple-java-maven-app.git", description: "Git URL of the Maven project", name: "git_url")
         
-        string(
-            name: "asd",
-            description: "asd",
-            defailtValue: "asd"
-        )
     }
 
     stages{
