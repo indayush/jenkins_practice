@@ -10,7 +10,7 @@ pipeline {
         }
         stage("Clone Repo"){
             steps{
-                    git credentialsId: '56e4dc52-a834-454f-a862-fcfa3c8a6083', url: 'https://bitbucket.org/hgrailsbackend/ror-hello-world.git', branch: 'master'
+                    git credentialsId: 'git-indayush-password', url: 'https://bitbucket.org/hgrailsbackend/ror-hello-world.git', branch: 'master'
                     sh "git checkout demo"
                     sh "ls -lath"
             }
