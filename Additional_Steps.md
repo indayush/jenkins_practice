@@ -14,7 +14,11 @@ Installed Plugins -
         - https://www.youtube.com/watch?v=EK0jjBCqz1A
 
 
-    - 
+    - Master Slave Setup
+        - Create credentials in "SSH Username with private key" mode
+        - Set the Host Key Verification Strategy = "Non verifying Verification Strategy"
+        - Use Private IP for Instance
+        - Specify label for addressing the Node 
 
 
 
