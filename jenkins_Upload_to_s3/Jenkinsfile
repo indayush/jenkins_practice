@@ -9,7 +9,7 @@ pipeline {
 
         // Jenkins Configurations
         string(defaultValue: "indayush-new", description: "Name of the Credentials Profile in jenkins DB", name: "credentials_in_jenkins")
-        string(defaultValue: "target", description: "Path of the folder from where the Artifacts needs to be picked", name: "folder_path_for_artifactory")        
+        string(defaultValue: "", description: "Path of the folder from where the Artifacts needs to be picked", name: "folder_path_for_artifactory")        
         
         // Project Configurations
         string(defaultValue: "https://github.com/jenkins-docs/simple-java-maven-app.git", description: "Git URL of the Maven project", name: "git_url")
@@ -46,7 +46,7 @@ pipeline {
                 dir("simple-java-maven-app"){
                     // pwd()
                     withAWS(region: "${params.s3_bucket_region}", credentials: "${params.credentials_in_jenkins}"){
-                        s3Upload(bucket: "${params.s3_bucket_name}", workingDir: "${params.folder_path_for_artifactory}", includePathPattern: '**/*.jar')
+                        s3Upload(bucket: "${params.s3_bucket_name}", workingDir: "${params.folder_path_for_artifactory}", includePathPattern: '**/*.*')
                     }
                 }
             }
