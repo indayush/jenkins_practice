@@ -5,10 +5,10 @@ pipeline {
         
         // AWS Configurations
         string(defaultValue: "ap-south-1", description: "AWS Region for S3 Bucket", name: "s3_bucket_region")
-        choice(choices: ["ayush-artifact-bucket", "my-hg-destination-bkt"], description: "Name of the S3 Bucket to upload the Artifacts", name: "s3_bucket_name")
+        choice(choices: ["demo-artifact-bkt", "demo-artifact-bkt"], description: "Name of the S3 Bucket to upload the Artifacts", name: "s3_bucket_name")
 
         // Jenkins Configurations
-        string(defaultValue: "OLD_AWS_ayush-cli", description: "Name of the Credentials Profile in jenkins DB", name: "credentials_in_jenkins")
+        string(defaultValue: "indayush-new", description: "Name of the Credentials Profile in jenkins DB", name: "credentials_in_jenkins")
         string(defaultValue: "target", description: "Path of the folder from where the Artifacts needs to be picked", name: "folder_path_for_artifactory")        
         
         // Project Configurations
@@ -30,7 +30,7 @@ pipeline {
         stage("Build"){
             steps{
                 dir("simple-java-maven-app"){
-                    sh "mvn clean install"
+                    sh "mvn install"
                 }                
             }
         }
@@ -46,17 +46,7 @@ pipeline {
                 dir("simple-java-maven-app"){
                     // pwd()
                     withAWS(region: "${params.s3_bucket_region}", credentials: "${params.credentials_in_jenkins}"){
-                        s3Upload(bucket: "${params.s3_bucket_name}", workingDir: "${params.folder_path_for_artifactory}", includePathPattern: '*.jar')
-                    }
-                }
-            }
-        }
-        stage("Upload built files to S3"){
-            steps{
-                dir("simple-java-maven-app"){
-                    echo "pwd"
-                    withAWS(region: "${params.s3_bucket_region}", credentials: "${params.credentials_in_jenkins}"){
-                        s3Upload(bucket: "${params.s3_bucket_name}", workingDir: '', includePathPattern: '**/*.*')
+                        s3Upload(bucket: "${params.s3_bucket_name}", workingDir: "${params.folder_path_for_artifactory}", includePathPattern: '**/*.jar')
                     }
                 }
             }
