@@ -9,7 +9,7 @@ pipeline {
                 description: "Enter Brnach Name")
 
         string(
-                name: "git_url", defaultValue: "https://github.com/indayush/ror-hello-world.git", 
+                name: "git_url", defaultValue: "https://bitbucket.org/hgrailsbackend/ror-hello-world.git", 
                 description: "Git URL of the project")
 
         choice(
@@ -68,13 +68,15 @@ pipeline {
 
         stage("Clone Repo"){
             steps{
-                sh "git clone ${params.git_url}"
+                git credentialsId: 'git-indayush-password', url: "${params.git_url}", branch: 'master'
             }
         }
 
         stage("Checkout Branch"){
             steps{
                 dir("ror-hello-world"){
+                    // sh "git reset --hard"
+                    // sh "git fetch -av"
                     sh "git checkout ${params.s_Branch_Name}"
                     sh "git branch"
                     sh '''#!/bin/bash
