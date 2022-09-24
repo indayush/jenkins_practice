@@ -24,19 +24,6 @@ pipeline {
         choice(
                 name: "s3_bucket_name", choices: ["demo-artifact-bkt", "some-other-bucket-name"], 
                 description: "Name of the S3 Bucket to upload the Artifacts")
-
-        string(
-                name: "credentials_in_jenkins", defaultValue: "indayush-new", 
-                description: "Name of the Credentials Profile in jenkins DB")
-
-        string(
-                name: "folder_path_for_artifactory", defaultValue: "", 
-                description: "Path of the folder from where the Artifacts needs to be picked")
-
-        string(
-                name: "file_extension_for_artifactory", defaultValue: "**/*.zip", 
-                description: "Pattern of the file(s) that is to be sent to Artifactory")
-
     }
 
     environment{
@@ -82,12 +69,9 @@ pipeline {
                     sh '''#!/bin/bash
                         source ~/.rvm/scripts/rvm
                         source ~/.bashrc
-
-                        rvm list
+                        
                         rails -v
-                        ruby -v 
-                        ls -lah
-                        pwd            
+                        ruby -v            
                     '''
                 // }
             }
@@ -95,24 +79,11 @@ pipeline {
 
         stage("Upload Artifact"){
             steps{
-                // dir("${s_Project_Name}"){
-                    sh "aws deploy push --application-name CodeDeployDemo --s3-location s3://demo-artifact-bkt/${params.s_Branch_Name}.zip --ignore-hidden-files --region ${params.aws_region}"                    
-                // }
+                    sh "aws deploy push --application-name CodeDeployDemo \
+                        --s3-location s3://demo-artifact-bkt/artifacts/${params.s_Branch_Name}.zip \
+                        --ignore-hidden-files --region ${params.aws_region}"                    
             }
         }
-
-        // stage("Upload to S3"){
-        //     steps{
-        //         sleep(2)
-        //         dir("${s_Project_Name}"){
-        //             // pwd()
-        //             withAWS(region: "${params.aws_region}", credentials: "${params.credentials_in_jenkins}"){
-        //                 s3Upload(bucket: "${params.s3_bucket_name}", workingDir: "${params.folder_path_for_artifactory}",
-        //                 includePathPattern: "${params.file_extension_for_artifactory}")
-        //             }
-        //         }
-        //     }
-        // }
 
         stage("Create Deployment"){
             steps{
@@ -120,7 +91,7 @@ pipeline {
                         --application-name CodeDeployDemo \
                         --deployment-config-name CodeDeployDefault.OneAtATime \
                         --deployment-group-name MyDevInstances \
-                        --s3-location bucket=demo-artifact-bkt,bundleType=zip,key=${params.s_Branch_Name}.zip"                
+                        --s3-location bucket=demo-artifact-bkt,bundleType=zip,key=artifacts/${params.s_Branch_Name}.zip"                
             }
         }
 
