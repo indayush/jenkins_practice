@@ -13,7 +13,7 @@ pipeline {
                 description: "Git URL of the project")
 
         choice(
-                name: "select_env", choices: ["DEV", "QA", "QA1", "PROD"], 
+                name: "select_env", choices: ["MyDevInstances", "QA", "QA1", "MyProdInstances"], 
                 description: "Select Environment: ")
 
         // AWS Configurations
@@ -22,13 +22,16 @@ pipeline {
                 description: "AWS Region for Deployment")
 
         choice(
-                name: "s3_bucket_name", choices: ["demo-artifact-bkt", "some-other-bucket-name"], 
+                name: "s3_bucket_name", choices: ["demo-artifact-bkt", "hg-practice-bucket"], 
                 description: "Name of the S3 Bucket to upload the Artifacts")
     }
 
     environment{
         def s_Project_Name = "codedeployment-demo"
         
+        // AWS CodeDeploy Variables
+        def aws_codeDeploy_application_name = "CodeDeployDemo"
+        def aws_codeDeploy_deployment_config_name = "CodeDeployDefault.OneAtATime"        
     }
 
     // Entire Pipeline Timeout value
@@ -38,7 +41,7 @@ pipeline {
 
     stages{
         stage("Clean Up"){
-            // Max Timeout value for this Stage            
+            // Max Timeout value for this Stage
             options{
                 timeout(time: 1, unit: 'MINUTES')
             }
@@ -47,19 +50,21 @@ pipeline {
             }
         }
 
-        stage("Targeting Environment"){
-            steps{
-                sh "echo ${params.select_env} Environment is selected"
-            }
-        }
-
         stage("Clone Repo"){
+            // Max Timeout value for this Stage
+            options{
+                timeout(time: 1, unit: 'MINUTES')
+            }
             steps{
                 git credentialsId: 'git-indayush-password', url: "${params.git_url}", branch: 'master'
             }
         }
 
         stage("Checkout Branch"){
+            // Max Timeout value for this Stage
+            options{
+                timeout(time: 1, unit: 'MINUTES')
+            }
             steps{
                 // dir("${s_Project_Name}"){
                     // sh "git reset --hard"
@@ -71,27 +76,39 @@ pipeline {
                         source ~/.bashrc
                         
                         rails -v
-                        ruby -v            
+                        ruby -v
+
+                        ls -lath         
                     '''
+
                 // }
             }
         }
 
         stage("Upload Artifact"){
+            // Max Timeout value for this Stage
+            options{
+                timeout(time: 1, unit: 'MINUTES')
+            }
             steps{
                     sh "aws deploy push --application-name CodeDeployDemo \
-                        --s3-location s3://demo-artifact-bkt/artifacts/${params.s_Branch_Name}.zip \
-                        --ignore-hidden-files --region ${params.aws_region}"                    
+                        --s3-location s3://${params.s3_bucket_name}/artifacts/${params.s_Branch_Name}.zip \
+                        --ignore-hidden-files --region ${params.aws_region}"
+                    sleep(1)
             }
         }
 
-        stage("Create Deployment"){
+        stage("Launch Deployment"){
+            // Max Timeout value for this Stage
+            options{
+                timeout(time: 1, unit: 'MINUTES')
+            }
             steps{
                 sh "aws deploy create-deployment \
-                        --application-name CodeDeployDemo \
-                        --deployment-config-name CodeDeployDefault.OneAtATime \
-                        --deployment-group-name MyDevInstances \
-                        --s3-location bucket=demo-artifact-bkt,bundleType=zip,key=artifacts/${params.s_Branch_Name}.zip"                
+                        --application-name ${aws_codeDeploy_application_name} \
+                        --deployment-config-name ${aws_codeDeploy_deployment_config_name} \
+                        --deployment-group-name ${params.select_env} \
+                        --s3-location bucket=${params.s3_bucket_name},bundleType=zip,key=artifacts/${params.s_Branch_Name}.zip"                
             }
         }
 
