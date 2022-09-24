@@ -1,0 +1,16 @@
+pipeline {
+    agent any 
+
+    stages{
+       stage("Trigger Lambda"){
+            steps{
+                
+                def result = invokeLambda(
+                    functionName: 'demo-function',
+                    payload: [ "key": "value", "anotherkey" : [ "another", "value"] ]
+                )
+
+            }
+        }
+    }
+}

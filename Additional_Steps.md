@@ -18,7 +18,10 @@ Installed Plugins -
         - Create credentials in "SSH Username with private key" mode
         - Set the Host Key Verification Strategy = "Non verifying Verification Strategy"
         - Use Private IP for Instance
-        - Specify label for addressing the Node 
+        - Specify label for addressing the Node
+
+    - AWS CodeDeploy
+        - Post Build Steps to CodeDeploy
 
 
 

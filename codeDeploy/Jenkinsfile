@@ -1,0 +1,140 @@
+pipeline {
+
+    agent any
+    
+    parameters{
+    
+        string(
+                name: "s_Branch_Name", defaultValue: "master",
+                description: "Enter Brnach Name")
+
+        string(
+                name: "git_url", defaultValue: "https://bitbucket.org/hgrailsbackend/codedeployment-demo.git", 
+                description: "Git URL of the project")
+
+        choice(
+                name: "select_env", choices: ["DEV", "QA", "QA1", "PROD"], 
+                description: "Select Environment: ")
+
+        // AWS Configurations
+        choice(
+                name: "aws_region", choices: ["ap-south-1", "ap-southeast-1", "us-east-1"], 
+                description: "AWS Region for Deployment")
+
+        choice(
+                name: "s3_bucket_name", choices: ["demo-artifact-bkt", "some-other-bucket-name"], 
+                description: "Name of the S3 Bucket to upload the Artifacts")
+
+        string(
+                name: "credentials_in_jenkins", defaultValue: "indayush-new", 
+                description: "Name of the Credentials Profile in jenkins DB")
+
+        string(
+                name: "folder_path_for_artifactory", defaultValue: "", 
+                description: "Path of the folder from where the Artifacts needs to be picked")
+
+        string(
+                name: "file_extension_for_artifactory", defaultValue: "**/*.zip", 
+                description: "Pattern of the file(s) that is to be sent to Artifactory")
+
+    }
+
+    environment{
+        def s_Project_Name = "codedeployment-demo"
+        
+    }
+
+    // Entire Pipeline Timeout value
+    options{
+        timeout(time: 20, unit: 'MINUTES')
+    }
+
+    stages{
+        stage("Clean Up"){
+            // Max Timeout value for this Stage            
+            options{
+                timeout(time: 1, unit: 'MINUTES')
+            }
+            steps{
+                deleteDir()
+            }
+        }
+
+        stage("Targeting Environment"){
+            steps{
+                sh "echo ${params.select_env} Environment is selected"
+            }
+        }
+
+        stage("Clone Repo"){
+            steps{
+                git credentialsId: 'git-indayush-password', url: "${params.git_url}", branch: 'master'
+            }
+        }
+
+        stage("Checkout Branch"){
+            steps{
+                // dir("${s_Project_Name}"){
+                    // sh "git reset --hard"
+                    // sh "git fetch -av"
+                    sh "git checkout ${params.s_Branch_Name}"
+                    sh "git branch"
+                    sh '''#!/bin/bash
+                        source ~/.rvm/scripts/rvm
+                        source ~/.bashrc
+
+                        rvm list
+                        rails -v
+                        ruby -v 
+                        ls -lah
+                        pwd            
+                    '''
+                // }
+            }
+        }
+
+        stage("Upload Artifact"){
+            steps{
+                // dir("${s_Project_Name}"){
+                    sh "aws deploy push --application-name CodeDeployDemo --s3-location s3://demo-artifact-bkt/${params.s_Branch_Name}.zip --ignore-hidden-files --region ${params.aws_region}"                    
+                // }
+            }
+        }
+
+        // stage("Upload to S3"){
+        //     steps{
+        //         sleep(2)
+        //         dir("${s_Project_Name}"){
+        //             // pwd()
+        //             withAWS(region: "${params.aws_region}", credentials: "${params.credentials_in_jenkins}"){
+        //                 s3Upload(bucket: "${params.s3_bucket_name}", workingDir: "${params.folder_path_for_artifactory}",
+        //                 includePathPattern: "${params.file_extension_for_artifactory}")
+        //             }
+        //         }
+        //     }
+        // }
+
+        stage("Create Deployment"){
+            steps{
+                sh "aws deploy create-deployment \
+                        --application-name CodeDeployDemo \
+                        --deployment-config-name CodeDeployDefault.OneAtATime \
+                        --deployment-group-name MyDevInstances \
+                        --s3-location bucket=demo-artifact-bkt,bundleType=zip,key=${params.s_Branch_Name}.zip"                
+            }
+        }
+
+    }
+
+
+    post {
+        failure {
+            // Runs ONLY in case of failure, We can have simple Notification/'git blame' on build history :)
+            // currentBuild.displayName = 'This build needs help!!!'
+            // buildDescription("Committer: ${GERRIT_PATCHSET_UPLOADER_NAME}")
+
+            sh("echo FAILURE FOUND")
+        }
+    }
+
+}
