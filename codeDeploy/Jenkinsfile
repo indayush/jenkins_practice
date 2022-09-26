@@ -24,6 +24,10 @@ pipeline {
         choice(
                 name: "s3_bucket_name", choices: ["demo-artifact-bkt", "hg-practice-bucket"], 
                 description: "Name of the S3 Bucket to upload the Artifacts")
+
+        choice(
+                name: "codeDeploy_deployment_configuration", choices: ["OneAtATime", "HalfAtATime", "AllAtOnce"], 
+                description: "Deployment Strategy")
     }
 
     environment{
@@ -31,7 +35,7 @@ pipeline {
         
         // AWS CodeDeploy Variables
         def aws_codeDeploy_application_name = "CodeDeployDemo"
-        def aws_codeDeploy_deployment_config_name = "CodeDeployDefault.OneAtATime"        
+        // def aws_codeDeploy_deployment_config_name = "CodeDeployDefault.OneAtATime"        
     }
 
     // Entire Pipeline Timeout value
@@ -106,7 +110,7 @@ pipeline {
             steps{
                 sh "aws deploy create-deployment \
                         --application-name ${aws_codeDeploy_application_name} \
-                        --deployment-config-name ${aws_codeDeploy_deployment_config_name} \
+                        --deployment-config-name CodeDeployDefault.${params.codeDeploy_deployment_configuration} \
                         --deployment-group-name ${params.select_env} \
                         --s3-location bucket=${params.s3_bucket_name},bundleType=zip,key=artifacts/${params.s_Branch_Name}.zip"                
             }
