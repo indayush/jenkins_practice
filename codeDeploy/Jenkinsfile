@@ -13,7 +13,7 @@ pipeline {
                 description: "Git URL of the project")
 
         choice(
-                name: "select_env", choices: ["MyDevInstances", "QA", "QA1", "MyProdInstances"], 
+                name: "select_env", choices: ["MyDevInstances", "MyProdInstances", "MyCodeDeployInstances"], 
                 description: "Select Environment: ")
 
         // AWS Configurations
