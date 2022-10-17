@@ -23,6 +23,9 @@ Installed Plugins -
     - AWS CodeDeploy
         - Post Build Steps to CodeDeploy
 
+    - Role Based Authorization Strategy
+        - Create User/Groups according to reqs and assign permissions
+
 
 
 For Slave EC2s Setup -
