@@ -26,6 +26,9 @@ Installed Plugins -
     - Role Based Authorization Strategy
         - Create User/Groups according to reqs and assign permissions
 
+    - build user vars
+        - Get Current logged in User Name
+
 
 
 For Slave EC2s Setup -

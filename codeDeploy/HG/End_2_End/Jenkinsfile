@@ -1,0 +1,135 @@
+pipeline {
+
+    agent any
+    
+    parameters{
+    
+        string(
+                name: "s_Branch_Name", defaultValue: "master",
+                description: "Enter Brnach Name")
+
+        string(
+                name: "git_url", defaultValue: "https://bitbucket.org/hgrailsbackend/codedeployment-demo.git", 
+                description: "Git URL of the project")
+
+        choice(
+                name: "select_env", choices: ["DevOps-Test", "QA", "QA1", "QA2", "QA3", "QA4", "QA5", "QA6"], 
+                description: "Select Environment: ")
+
+        // AWS Configurations
+        choice(
+                name: "aws_region", choices: ["ap-southeast-1", "ap-south-1"], 
+                description: "AWS Region for Deployment")
+
+        choice(
+                name: "s3_bucket_name", choices: ["hg-non-prod-jenkins-artifact-bucket", "hg-prod-jenkins-artifact-bucket"], 
+                description: "Name of the S3 Bucket to upload the Artifacts")
+
+        choice(
+                name: "codeDeploy_deployment_configuration", choices: ["OneAtATime", "HalfAtATime", "AllAtOnce"], 
+                description: "Deployment Strategy")
+    }
+
+    environment{
+        def s_Project_Name = "codedeployment-demo"
+        
+        // AWS CodeDeploy Variables
+        def aws_codeDeploy_application_name = "EHR"
+        def s3_object_upload_path = "artifacts/"        
+    }
+
+    // Entire Pipeline Timeout value
+    options{
+        timeout(time: 20, unit: 'MINUTES')
+    }
+
+    stages{
+        stage("Clean Up"){
+            // Max Timeout value for this Stage
+            options{
+                timeout(time: 1, unit: 'MINUTES')
+            }
+            steps{
+                deleteDir()
+            }
+        }
+
+        stage("Clone Repo"){
+            // Max Timeout value for this Stage
+            options{
+                timeout(time: 1, unit: 'MINUTES')
+            }
+            steps{
+                git credentialsId: 'git-indayush-password', url: "${params.git_url}", branch: 'master'
+            }
+        }
+
+        stage("Checkout Branch"){
+            // Max Timeout value for this Stage
+            options{
+                timeout(time: 1, unit: 'MINUTES')
+            }
+            steps{
+                // dir("${s_Project_Name}"){
+                    // sh "git reset --hard"
+                    // sh "git fetch -av"
+                    sh "git checkout ${params.s_Branch_Name}"
+                    sh "git branch"
+                    sh '''#!/bin/bash
+                        source ~/.rvm/scripts/rvm
+                        source ~/.bashrc
+                        
+                        rails -v
+                        ruby -v
+
+                        ls -lath         
+                    '''
+
+                // }
+            }
+        }
+
+        stage("Upload Artifact"){
+            // Max Timeout value for this Stage
+            options{
+                timeout(time: 1, unit: 'MINUTES')
+            }
+            steps{
+                    sh "aws deploy push --application-name ${aws_codeDeploy_application_name} \
+                        --s3-location s3://${params.s3_bucket_name}/${s3_object_upload_path}${params.s_Branch_Name}.zip \
+                        --ignore-hidden-files --region ${params.aws_region}"
+                    sleep(1)
+            }
+        }
+
+        stage("Launch Deployment"){
+            // Max Timeout value for this Stage
+            options{
+                timeout(time: 1, unit: 'MINUTES')
+            }
+            steps{
+                sh "aws deploy create-deployment \
+                        --application-name ${aws_codeDeploy_application_name} \
+                        --deployment-config-name CodeDeployDefault.${params.codeDeploy_deployment_configuration} \
+                        --deployment-group-name ${params.select_env} \
+                        --s3-location bucket=${params.s3_bucket_name},bundleType=zip,key=${s3_object_upload_path}${params.s_Branch_Name}.zip"                
+            }
+        }
+
+
+        // aws deploy get-deployment --deployment-id d-BSF34COPJ
+
+    }
+
+
+    post {
+        failure {
+            // Runs ONLY in case of failure, We can have simple Notification/'git blame' on build history :)
+            // currentBuild.displayName = 'This build needs help!!!'
+            // buildDescription("Committer: ${GERRIT_PATCHSET_UPLOADER_NAME}")
+
+            sh("echo FAILURE FOUND")
+        }
+    }
+
+}
